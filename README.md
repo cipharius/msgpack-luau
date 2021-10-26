@@ -10,7 +10,7 @@ A pure MessagePack binary serialization format implementation in Luau.
 
 ## State of project
 
-Currently only decoding is implemented (without floating point type).
+Currently only decoding is implemented.
 Not thoroughly tested.
 
 ## Usage
