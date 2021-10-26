@@ -3,6 +3,8 @@ local MsgPack = {}
 local band = bit32.band
 local bor = bit32.bor
 local lshift = bit32.lshift
+local extract = bit32.extract
+local ldexp = math.ldexp
 
 local parse
 function parse(str, ofs)
@@ -75,10 +77,66 @@ function parse(str, ofs)
     }, ofs + 6 + len
 
   elseif b == 0xCA then -- float 32
-    error("Stub")
+    local f0, f1, f2, f3 = str:byte(ofs + 2, ofs + 5)
+    local f = bor(
+      lshift(f0, 24),
+      lshift(f1, 16),
+      lshift(f2, 8),
+      f3
+    )
+
+    local exponent = extract(f, 23, 8)
+    local sign = 1 - 2 * extract(f, 31)
+    if exponent == 0xFF then -- nan or inf
+      if band(f, 0x007FFFFF) == 0 then
+        return sign * math.huge -- +/- inf
+      else
+        return 0 / 0 -- nan
+      end
+    end
+
+    local sum = 1
+    for i=1,23 do
+      sum += ldexp(extract(f, 23 - i), -i)
+    end
+
+    return ldexp(sign * sum, exponent - 127 ), ofs + 5
 
   elseif b == 0xCB then -- float 64
-    error("Stub")
+    local f0, f1, f2, f3, f4, f5, f6, f7 = str:byte(ofs + 2, ofs + 9)
+    local fA = bor(
+      lshift(f0, 24),
+      lshift(f1, 16),
+      lshift(f2, 8),
+      f3
+    )
+    local fB = bor(
+      lshift(f4, 24),
+      lshift(f5, 16),
+      lshift(f6, 8),
+      f7
+    )
+
+    local exponent = extract(fA, 20, 11)
+    local sign = 1 - 2 * extract(fA, 31)
+    if exponent == 0x7FF then -- nan or inf
+      if fB == 0 and band(fA, 0x000FFFFF) == 0 then
+        return sign * math.huge -- +/- inf
+      else
+        return 0 / 0 -- nan
+      end
+    end
+
+    local sum = 1
+    for i=1,52 do
+      if i <= 20 then
+        sum += ldexp(extract(fA, 20 - i), -i)
+      else
+        sum += ldexp(extract(fB, 52 - i), -i)
+      end
+    end
+
+    return ldexp(sign * sum, exponent - 1023 ), ofs + 9
 
   elseif b == 0xCC then -- uint 8
     return str:byte(ofs + 2), ofs + 2
