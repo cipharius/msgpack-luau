@@ -1,0 +1,11 @@
+{
+  "name": "msgpack-luau",
+  "tree": {
+    "$className": "DataModel",
+
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+      "$path": "src"
+    }
+  }
+}
