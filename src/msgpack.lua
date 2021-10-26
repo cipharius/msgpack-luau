@@ -22,7 +22,7 @@ function parse(message: string, offset: number): (any, number)
 
   elseif byte == 0xC4 then -- bin 8
     local length = message:byte(offset + 2)
-    return {message:byte(offset + 3, offset + 2 + length)},
+    return msgpack.ByteArray.new(message:sub(offset + 3, offset + 2 + length)),
            offset + 2 + length
 
   elseif byte == 0xC5 then -- bin 16
@@ -32,7 +32,7 @@ function parse(message: string, offset: number): (any, number)
       i1
     )
 
-    return {message:byte(offset + 4, offset + 3 + length)},
+    return msgpack.ByteArray.new(message:sub(offset + 4, offset + 3 + length)),
            offset + 3 + length
 
   elseif byte == 0xC6 then -- bin 32
@@ -44,16 +44,16 @@ function parse(message: string, offset: number): (any, number)
       i3
     )
 
-    return {message:byte(offset + 6, offset + 5 + length)},
+    return msgpack.ByteArray.new(message:sub(offset + 6, offset + 5 + length)),
            offset + 5 + length
 
   elseif byte == 0xC7 then -- ext 8
     local length = message:byte(offset + 2)
-    return {
-            type = message:byte(offset + 3),
-            data = message:sub(offset + 4, offset + 3 + length)
-          },
-          offset + 3 + length
+    return msgpack.Extension.new(
+             message:byte(offset + 3),
+             message:sub(offset + 4, offset + 3 + length)
+           ),
+           offset + 3 + length
 
   elseif byte == 0xC8 then -- ext 16
     local i0,i1 = message:byte(offset + 2, offset + 3)
@@ -62,11 +62,11 @@ function parse(message: string, offset: number): (any, number)
       i1
     )
 
-    return {
-             type = message:byte(offset + 4),
-             data = message:sub(offset + 5, offset + 4 + length)
-           },
-          offset + 4 + length
+    return msgpack.Extension.new(
+             message:byte(offset + 4),
+             message:sub(offset + 5, offset + 4 + length)
+           ),
+           offset + 4 + length
 
   elseif byte == 0xC9 then -- ext 32
     local i0,i1,i2,i3 = message:byte(offset + 2, offset + 5)
@@ -77,10 +77,10 @@ function parse(message: string, offset: number): (any, number)
       i3
     )
 
-    return {
-             type = message:byte(offset + 6),
-             data = message:sub(offset + 7, offset + 6 + length)
-           },
+    return msgpack.Extension.new(
+             message:byte(offset + 6),
+             message:sub(offset + 7, offset + 6 + length)
+           ),
            offset + 6 + length
 
   elseif byte == 0xCA then -- float 32
@@ -204,38 +204,38 @@ function parse(message: string, offset: number): (any, number)
     error("Luau does not support int 64")
 
   elseif byte == 0xD4 then -- fixext 1
-    return {
-             type = message:byte(offset + 2),
-             data = message:sub(offset + 3, offset + 3)
-           },
+    return msgpack.Extension.new(
+             message:byte(offset + 2),
+             message:sub(offset + 3, offset + 3)
+           ),
            offset + 3
 
   elseif byte == 0xD5 then -- fixext 2
-    return {
-             type = message:byte(offset + 2),
-             data = message:sub(offset + 3, offset + 4)
-           },
+    return msgpack.Extension.new(
+             message:byte(offset + 2),
+             message:sub(offset + 3, offset + 4)
+           ),
            offset + 4
 
   elseif byte == 0xD6 then -- fixext 4
-    return {
-             type = message:byte(offset + 2),
-             data = message:sub(offset + 3, offset + 6)
-           },
+    return msgpack.Extension.new(
+             message:byte(offset + 2),
+             message:sub(offset + 3, offset + 6)
+           ),
            offset + 6
 
   elseif byte == 0xD7 then -- fixext 8
-    return {
-             type = message:byte(offset + 2),
-             data = message:sub(offset + 3, offset + 10)
-           },
+    return msgpack.Extension.new(
+             message:byte(offset + 2),
+             message:sub(offset + 3, offset + 10)
+           ),
            offset + 10
 
   elseif byte == 0xD8 then -- fixext 16
-    return {
-             type = message:byte(offset + 2),
-             data = message:sub(offset + 3, offset + 18)
-           },
+    return msgpack.Extension.new(
+             message:byte(offset + 2),
+             message:sub(offset + 3, offset + 18)
+           ),
            offset + 18
 
   elseif byte == 0xD9 then -- str 8
@@ -373,6 +373,26 @@ function parse(message: string, offset: number): (any, number)
   error("Not all decoder cases are handled")
 end
 
+
+msgpack.ByteArray = {}
+
+function msgpack.ByteArray.new(blob: string): ByteArray
+  return {
+    _msgpackType = msgpack.ByteArray,
+    data = blob
+  }
+end
+
+msgpack.Extension = {}
+
+function msgpack.Extension.new(extensionType: number, blob: string): Extension
+  return {
+    _msgpackType = msgpack.Extension,
+    type = extensionType,
+    data = blob
+  }
+end
+
 function msgpack.decode(message: string): any
   if message == "" then
     error("Message is too short")
@@ -383,5 +403,8 @@ end
 function msgpack.encode(data: any): string
   error("Stub")
 end
+
+export type Extension = { _msgpackType: typeof(msgpack.Extension), type:number, data: string }
+export type ByteArray = { _msgpackType: typeof(msgpack.ByteArray), data: string }
 
 return msgpack
