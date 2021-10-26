@@ -1,4 +1,4 @@
-local MsgPack = {}
+local msgpack = {}
 
 local band = bit32.band
 local bor = bit32.bor
@@ -172,7 +172,7 @@ function parse(message, offset)
     end
 
   elseif byte == 0xD1 then -- int 16
-    local i0, i1 = message:byte(offset + 2, offset + 3)
+    local i0,i1 = message:byte(offset + 2, offset + 3)
     local i = bor(
       lshift(i0, 8),
       i1
@@ -185,7 +185,7 @@ function parse(message, offset)
     end
 
   elseif byte == 0xD2 then -- int 32
-    local i0, i1, i2, i3 = message:byte(offset + 2, offset + 5)
+    local i0,i1,i2,i3 = message:byte(offset + 2, offset + 5)
     local i = bor(
       lshift(i0, 24),
       lshift(i1, 16),
@@ -243,7 +243,7 @@ function parse(message, offset)
            offset + 2 + length
 
   elseif byte == 0xDA then -- str 16
-    local i0, i1 = message:byte(offset + 2, offset + 3)
+    local i0,i1 = message:byte(offset + 2, offset + 3)
     local length = bor(
       lshift(i0, 8),
       i1
@@ -253,7 +253,7 @@ function parse(message, offset)
            offset + 3 + length
 
   elseif byte == 0xDB then -- str 32
-    local i0, i1, i2, i3 = message:byte(offset + 2, offset + 5)
+    local i0,i1,i2,i3 = message:byte(offset + 2, offset + 5)
     local length = bor(
       lshift(i0, 24),
       lshift(i1, 16),
@@ -265,7 +265,7 @@ function parse(message, offset)
            offset + 5 + length
 
   elseif byte == 0xDC then -- array 16
-    local i0, i1 = message:byte(offset + 2, offset + 3)
+    local i0,i1 = message:byte(offset + 2, offset + 3)
     local length = bor(
       lshift(i0, 8),
       i1
@@ -280,7 +280,7 @@ function parse(message, offset)
     return array, newOffset
 
   elseif byte == 0xDD then -- array 32
-    local i0, i1, i2, i3 = message:byte(offset + 2, offset + 5)
+    local i0,i1,i2,i3 = message:byte(offset + 2, offset + 5)
     local length = bor(
       lshift(i0, 24),
       lshift(i1, 16),
@@ -297,7 +297,7 @@ function parse(message, offset)
     return array, newOffset
 
   elseif byte == 0xDE then -- map 16
-    local i0, i1 = message:byte(offset + 2, offset + 3)
+    local i0,i1 = message:byte(offset + 2, offset + 3)
     local length = bor(
       lshift(i0, 8),
       i1
@@ -314,7 +314,7 @@ function parse(message, offset)
     return dictionary, newOffset
 
   elseif byte == 0xDF then -- map 32
-    local i0, i1, i2, i3 = message:byte(offset + 2, offset + 5)
+    local i0,i1,i2,i3 = message:byte(offset + 2, offset + 5)
     local length = bor(
       lshift(i0, 24),
       lshift(i1, 16),
@@ -370,13 +370,13 @@ function parse(message, offset)
   end
 end
 
-function MsgPack.decode(message)
+function msgpack.decode(message)
   if message == "" then return end
   return (parse(message, 0))
 end
 
-function MsgPack.encode(data)
+function msgpack.encode(data)
   error("Stub")
 end
 
-return MsgPack
+return msgpack
