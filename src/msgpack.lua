@@ -95,9 +95,9 @@ function parse(message, offset)
     local sign = 1 - 2 * extract(f, 31)
     if exponent == 0xFF then -- nan or inf
       if band(f, 0x007FFFFF) == 0 then
-        return sign * math.huge -- +/- inf
+        return sign * math.huge, offset + 5 -- +/- inf
       else
-        return 0 / 0 -- nan
+        return 0 / 0, offset + 5 -- nan
       end
     end
 
@@ -128,9 +128,9 @@ function parse(message, offset)
     local sign = 1 - 2 * extract(fA, 31)
     if exponent == 0x7FF then -- nan or inf
       if fB == 0 and band(fA, 0x000FFFFF) == 0 then
-        return sign * math.huge -- +/- inf
+        return sign * math.huge, offset + 9 -- +/- inf
       else
-        return 0 / 0 -- nan
+        return 0 / 0, offset + 9 -- nan
       end
     end
 
