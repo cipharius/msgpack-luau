@@ -92,22 +92,27 @@ function parse(message: string, offset: number): (any, number)
       f3
     )
 
+    local mantissa = band(f, 0x007FFFFF)
     local exponent = extract(f, 23, 8)
     local sign = 1 - 2 * extract(f, 31)
-    if exponent == 0xFF then -- nan or inf
-      if band(f, 0x007FFFFF) == 0 then
-        return sign * math.huge, offset + 5 -- +/- inf
+    if exponent == 0xFF then
+      if mantissa == 0 then
+        return sign * math.huge, offset + 5
       else
-        return 0 / 0, offset + 5 -- nan
+        return 0 / 0, offset + 5
+      end
+    elseif exponent == 0 then
+      if mantissa == 0 then
+        return 0, offset + 5
+      else
+        return ldexp(sign * mantissa / 0x800000, -126),
+               offset + 5
       end
     end
 
-    local sum = 1
-    for i=1,23 do
-      sum += ldexp(extract(f, 23 - i), -i)
-    end
+    mantissa = (mantissa / 0x800000) + 1
 
-    return ldexp(sign * sum, exponent - 127 ),
+    return ldexp(sign * mantissa, exponent - 127 ),
            offset + 5
 
   elseif byte == 0xCB then -- float 64
@@ -125,26 +130,27 @@ function parse(message: string, offset: number): (any, number)
       f7
     )
 
+    local mantissa = band(fA, 0x000FFFFF) * 0x100000000 + fB
     local exponent = extract(fA, 20, 11)
     local sign = 1 - 2 * extract(fA, 31)
-    if exponent == 0x7FF then -- nan or inf
-      if fB == 0 and band(fA, 0x000FFFFF) == 0 then
-        return sign * math.huge, offset + 9 -- +/- inf
+    if exponent == 0x7FF then
+      if mantissa == 0 then
+        return sign * math.huge, offset + 9
       else
-        return 0 / 0, offset + 9 -- nan
+        return 0 / 0, offset + 9
+      end
+    elseif exponent == 0 then
+      if mantissa == 0 then
+        return 0, offset + 9
+      else
+        return ldexp(sign * mantissa / 0x10000000000000, exponent - 1022 ),
+               offset + 9
       end
     end
 
-    local sum = 1
-    for i=1,52 do
-      if i <= 20 then
-        sum += ldexp(extract(fA, 20 - i), -i)
-      else
-        sum += ldexp(extract(fB, 52 - i), -i)
-      end
-    end
+    mantissa = (mantissa / 0x10000000000000) + 1
 
-    return ldexp(sign * sum, exponent - 1023 ),
+    return ldexp(sign * mantissa, exponent - 1023 ),
            offset + 9
 
   elseif byte == 0xCC then -- uint 8
