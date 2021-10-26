@@ -307,7 +307,7 @@ function parse(message: string, offset: number): (any, number)
     local newOffset = offset + 3
     local key
 
-    for _=1,len do
+    for _=1,length do
       key, newOffset = parse(message, newOffset)
       dictionary[key], newOffset = parse(message, newOffset)
     end
@@ -326,7 +326,7 @@ function parse(message: string, offset: number): (any, number)
     local newOffset = offset + 5
     local key
 
-    for _=1,len do
+    for _=1,length do
       key, newOffset = parse(message, newOffset)
       dictionary[key], newOffset = parse(message, newOffset)
     end
