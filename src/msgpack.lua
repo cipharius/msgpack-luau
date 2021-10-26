@@ -1,3 +1,4 @@
+--!strict
 local msgpack = {}
 
 local band = bit32.band
@@ -7,7 +8,7 @@ local extract = bit32.extract
 local ldexp = math.ldexp
 
 local parse
-function parse(message, offset)
+function parse(message: string, offset: number): (any, number)
   local byte = message:byte(offset + 1, offset + 1)
 
   if byte == 0xC0 then     -- nil
@@ -368,14 +369,18 @@ function parse(message, offset)
            offset + 1 + length
 
   end
+
+  error("Not all decoder cases are handled")
 end
 
-function msgpack.decode(message)
-  if message == "" then return end
+function msgpack.decode(message: string): any
+  if message == "" then
+    error("Message is too short")
+  end
   return (parse(message, 0))
 end
 
-function msgpack.encode(data)
+function msgpack.encode(data: any): string
   error("Stub")
 end
 
