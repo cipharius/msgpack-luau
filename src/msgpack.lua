@@ -7,8 +7,7 @@ local lshift = bit32.lshift
 local extract = bit32.extract
 local ldexp = math.ldexp
 
-local parse
-function parse(message: string, offset: number): (any, number)
+local function parse(message: string, offset: number): (any, number)
   local byte = message:byte(offset + 1, offset + 1)
 
   if byte == 0xC0 then     -- nil
