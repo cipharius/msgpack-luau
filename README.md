@@ -27,7 +27,7 @@ To benchmark message decoding performance an approximately 210KB large JSON enco
 This JSON is then used as input for `HttpService:JSONEncode()` method and also encoded in MessagePack format so that it can be used as input for `msgpack.decode()` function.
 For MessagePack encoding [an online msgpack-lite encoder](https://kawanet.github.io/msgpack-lite/) was used.
 
-As visible in the BoatBomber's benchmarker plugin results, `msgpack.decode` considerably exceeds `JSONDecode` performance:
+As visible in the [boatbomber's benchmarker plugin](https://devforum.roblox.com/t/benchmarker-plugin-compare-function-speeds-with-graphs-percentiles-and-more/829912) results, `msgpack.decode` considerably exceeds `JSONDecode` performance:
 ![Figure with JSONDecode and msgpack.decode benchmark results](./assets/decode-benchmark.png)
 
 For more details on the benchmark setup, look into `./benchmark` directory.
