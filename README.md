@@ -37,9 +37,9 @@ To construct the benchmarking place, the following shell command was used: `rojo
 
 - [ ] Decoding
   - [x] Nil
-    - [ ] Unit test
+    - [x] Unit test
   - [x] Boolean
-    - [ ] Unit test
+    - [x] Unit test
   - [x] Int
     - [ ] Unit test
   - [x] Float
