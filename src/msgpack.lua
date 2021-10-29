@@ -167,7 +167,12 @@ local function parse(message: string, offset: number): (any, number)
            offset + 5
 
   elseif byte == 0xCF then -- uint 64
-    error("Luau does not support uint 64")
+    local i0,i1,i2,i3,i4,i5,i6,i7 = message:byte(offset + 2, offset + 97)
+    return msgpack.UInt64.new(
+             bor(lshift(i0, 24), lshift(i1, 16), lshift(i2, 8), i3),
+             bor(lshift(i4, 24), lshift(i5, 16), lshift(i6, 8), i7)
+           ),
+           offset + 9
 
   elseif byte == 0xD0 then -- int 8
     local i = message:byte(offset + 2)
@@ -206,7 +211,11 @@ local function parse(message: string, offset: number): (any, number)
     end
 
   elseif byte == 0xD3 then -- int 64
-    error("Luau does not support int 64")
+    local i0,i1,i2,i3,i4,i5,i6,i7 = message:byte(offset + 2, offset + 9)
+    return msgpack.Int64.new(
+             bor(lshift(i0, 24), lshift(i1, 16), lshift(i2, 8), i3),
+             bor(lshift(i4, 24), lshift(i5, 16), lshift(i6, 8), i7)
+           ), offset + 9
 
   elseif byte == 0xD4 then -- fixext 1
     return msgpack.Extension.new(
@@ -378,6 +387,25 @@ local function parse(message: string, offset: number): (any, number)
   error("Not all decoder cases are handled")
 end
 
+msgpack.Int64 = {}
+
+function msgpack.Int64.new(mostSignificantPart: number, leastSignificantPart: number): Int64
+  return {
+    _msgpackType = msgpack.Int64,
+    mostSignificantPart = mostSignificantPart,
+    leastSignificantPart = leastSignificantPart
+  }
+end
+
+msgpack.UInt64 = {}
+
+function msgpack.UInt64.new(mostSignificantPart: number, leastSignificantPart: number): UInt64
+  return {
+    _msgpackType = msgpack.UInt64,
+    mostSignificantPart = mostSignificantPart,
+    leastSignificantPart = leastSignificantPart
+  }
+end
 
 msgpack.ByteArray = {}
 
@@ -409,6 +437,8 @@ function msgpack.encode(data: any): string
   error("Stub")
 end
 
+export type Int64     = { _msgpackType: typeof(msgpack.Int64), mostSignificantPart: number, leastSignificantPart: number }
+export type UInt64    = { _msgpackType: typeof(msgpack.UInt64), mostSignificantPart: number, leastSignificantPart: number }
 export type Extension = { _msgpackType: typeof(msgpack.Extension), type:number, data: string }
 export type ByteArray = { _msgpackType: typeof(msgpack.ByteArray), data: string }
 
