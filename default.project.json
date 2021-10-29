@@ -1,11 +1,7 @@
 {
   "name": "msgpack-luau",
+  "globIgnorePaths": ["**/*.spec.lua"],
   "tree": {
-    "$className": "DataModel",
-
-    "ReplicatedStorage": {
-      "$className": "ReplicatedStorage",
-      "$path": "src"
-    }
+    "$path": "src"
   }
 }
