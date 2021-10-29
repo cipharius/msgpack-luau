@@ -31,7 +31,7 @@ As visible in the [boatbomber's benchmarker plugin](https://devforum.roblox.com/
 ![Figure with JSONDecode and msgpack.decode benchmark results](./assets/decode-benchmark.png)
 
 For more details on the benchmark setup, look into `./benchmark` directory.
-To construct the benchmarking place, the following shell command was used: `rojo build -o benchmark.rbxl benchmark-place.project.json`
+To construct the benchmarking place, the following shell command was used: `rojo build -o benchmark.rbxl benchmark.project.json`
 
 ## State of project
 
