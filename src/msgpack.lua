@@ -6,9 +6,11 @@ local bor = bit32.bor
 local lshift = bit32.lshift
 local extract = bit32.extract
 local ldexp = math.ldexp
+local sbyte = string.byte
+local ssub = string.sub
 
 local function parse(message: string, offset: number): (any, number)
-  local byte = message:byte(offset + 1, offset + 1)
+  local byte = sbyte(message, offset + 1, offset + 1)
 
   if byte == 0xC0 then     -- nil
     return nil, offset + 1
@@ -20,22 +22,22 @@ local function parse(message: string, offset: number): (any, number)
     return true, offset + 1
 
   elseif byte == 0xC4 then -- bin 8
-    local length = message:byte(offset + 2)
-    return msgpack.ByteArray.new(message:sub(offset + 3, offset + 2 + length)),
+    local length = sbyte(message, offset + 2)
+    return msgpack.ByteArray.new(ssub(message, offset + 3, offset + 2 + length)),
            offset + 2 + length
 
   elseif byte == 0xC5 then -- bin 16
-    local i0,i1 = message:byte(offset + 2, offset + 3)
+    local i0,i1 = sbyte(message, offset + 2, offset + 3)
     local length = bor(
       lshift(i0, 8),
       i1
     )
 
-    return msgpack.ByteArray.new(message:sub(offset + 4, offset + 3 + length)),
+    return msgpack.ByteArray.new(ssub(message, offset + 4, offset + 3 + length)),
            offset + 3 + length
 
   elseif byte == 0xC6 then -- bin 32
-    local i0,i1,i2,i3 = message:byte(offset + 2, offset + 5)
+    local i0,i1,i2,i3 = sbyte(message, offset + 2, offset + 5)
     local length = bor(
       lshift(i0, 24),
       lshift(i1, 16),
@@ -43,32 +45,32 @@ local function parse(message: string, offset: number): (any, number)
       i3
     )
 
-    return msgpack.ByteArray.new(message:sub(offset + 6, offset + 5 + length)),
+    return msgpack.ByteArray.new(ssub(message, offset + 6, offset + 5 + length)),
            offset + 5 + length
 
   elseif byte == 0xC7 then -- ext 8
-    local length = message:byte(offset + 2)
+    local length = sbyte(message, offset + 2)
     return msgpack.Extension.new(
-             message:byte(offset + 3),
-             message:sub(offset + 4, offset + 3 + length)
+             sbyte(message, offset + 3),
+             ssub(message, offset + 4, offset + 3 + length)
            ),
            offset + 3 + length
 
   elseif byte == 0xC8 then -- ext 16
-    local i0,i1 = message:byte(offset + 2, offset + 3)
+    local i0,i1 = sbyte(message, offset + 2, offset + 3)
     local length = bor(
       lshift(i0, 8),
       i1
     )
 
     return msgpack.Extension.new(
-             message:byte(offset + 4),
-             message:sub(offset + 5, offset + 4 + length)
+             sbyte(message, offset + 4),
+             ssub(message, offset + 5, offset + 4 + length)
            ),
            offset + 4 + length
 
   elseif byte == 0xC9 then -- ext 32
-    local i0,i1,i2,i3 = message:byte(offset + 2, offset + 5)
+    local i0,i1,i2,i3 = sbyte(message, offset + 2, offset + 5)
     local length = bor(
       lshift(i0, 24),
       lshift(i1, 16),
@@ -77,13 +79,13 @@ local function parse(message: string, offset: number): (any, number)
     )
 
     return msgpack.Extension.new(
-             message:byte(offset + 6),
-             message:sub(offset + 7, offset + 6 + length)
+             sbyte(message, offset + 6),
+             ssub(message, offset + 7, offset + 6 + length)
            ),
            offset + 6 + length
 
   elseif byte == 0xCA then -- float 32
-    local f0,f1,f2,f3 = message:byte(offset + 2, offset + 5)
+    local f0,f1,f2,f3 = sbyte(message, offset + 2, offset + 5)
     local f = bor(
       lshift(f0, 24),
       lshift(f1, 16),
@@ -115,7 +117,7 @@ local function parse(message: string, offset: number): (any, number)
            offset + 5
 
   elseif byte == 0xCB then -- float 64
-    local f0,f1,f2,f3,f4,f5,f6,f7 = message:byte(offset + 2, offset + 9)
+    local f0,f1,f2,f3,f4,f5,f6,f7 = sbyte(message, offset + 2, offset + 9)
     local fA = bor(
       lshift(f0, 24),
       lshift(f1, 16),
@@ -153,21 +155,21 @@ local function parse(message: string, offset: number): (any, number)
            offset + 9
 
   elseif byte == 0xCC then -- uint 8
-    return message:byte(offset + 2),
+    return sbyte(message, offset + 2),
            offset + 2
 
   elseif byte == 0xCD then -- uint 16
-    local i0,i1 = message:byte(offset + 2, offset + 3)
+    local i0,i1 = sbyte(message, offset + 2, offset + 3)
     return bor(lshift(i0, 8), i1),
            offset + 3
 
   elseif byte == 0xCE then -- uint 32
-    local i0,i1,i2,i3 = message:byte(offset + 2, offset + 5)
+    local i0,i1,i2,i3 = sbyte(message, offset + 2, offset + 5)
     return bor(lshift(i0, 24), lshift(i1, 16), lshift(i2, 8), i3),
            offset + 5
 
   elseif byte == 0xCF then -- uint 64
-    local i0,i1,i2,i3,i4,i5,i6,i7 = message:byte(offset + 2, offset + 97)
+    local i0,i1,i2,i3,i4,i5,i6,i7 = sbyte(message, offset + 2, offset + 97)
     return msgpack.UInt64.new(
              bor(lshift(i0, 24), lshift(i1, 16), lshift(i2, 8), i3),
              bor(lshift(i4, 24), lshift(i5, 16), lshift(i6, 8), i7)
@@ -175,7 +177,7 @@ local function parse(message: string, offset: number): (any, number)
            offset + 9
 
   elseif byte == 0xD0 then -- int 8
-    local i = message:byte(offset + 2)
+    local i = sbyte(message, offset + 2)
     if i <= 127 then
       return i, offset + 2
     else
@@ -183,7 +185,7 @@ local function parse(message: string, offset: number): (any, number)
     end
 
   elseif byte == 0xD1 then -- int 16
-    local i0,i1 = message:byte(offset + 2, offset + 3)
+    local i0,i1 = sbyte(message, offset + 2, offset + 3)
     local i = bor(
       lshift(i0, 8),
       i1
@@ -196,7 +198,7 @@ local function parse(message: string, offset: number): (any, number)
     end
 
   elseif byte == 0xD2 then -- int 32
-    local i0,i1,i2,i3 = message:byte(offset + 2, offset + 5)
+    local i0,i1,i2,i3 = sbyte(message, offset + 2, offset + 5)
     local i = bor(
       lshift(i0, 24),
       lshift(i1, 16),
@@ -211,7 +213,7 @@ local function parse(message: string, offset: number): (any, number)
     end
 
   elseif byte == 0xD3 then -- int 64
-    local i0,i1,i2,i3,i4,i5,i6,i7 = message:byte(offset + 2, offset + 9)
+    local i0,i1,i2,i3,i4,i5,i6,i7 = sbyte(message, offset + 2, offset + 9)
     return msgpack.Int64.new(
              bor(lshift(i0, 24), lshift(i1, 16), lshift(i2, 8), i3),
              bor(lshift(i4, 24), lshift(i5, 16), lshift(i6, 8), i7)
@@ -219,56 +221,56 @@ local function parse(message: string, offset: number): (any, number)
 
   elseif byte == 0xD4 then -- fixext 1
     return msgpack.Extension.new(
-             message:byte(offset + 2),
-             message:sub(offset + 3, offset + 3)
+             sbyte(message, offset + 2),
+             ssub(message, offset + 3, offset + 3)
            ),
            offset + 3
 
   elseif byte == 0xD5 then -- fixext 2
     return msgpack.Extension.new(
-             message:byte(offset + 2),
-             message:sub(offset + 3, offset + 4)
+             sbyte(message, offset + 2),
+             ssub(message, offset + 3, offset + 4)
            ),
            offset + 4
 
   elseif byte == 0xD6 then -- fixext 4
     return msgpack.Extension.new(
-             message:byte(offset + 2),
-             message:sub(offset + 3, offset + 6)
+             sbyte(message, offset + 2),
+             ssub(message, offset + 3, offset + 6)
            ),
            offset + 6
 
   elseif byte == 0xD7 then -- fixext 8
     return msgpack.Extension.new(
-             message:byte(offset + 2),
-             message:sub(offset + 3, offset + 10)
+             sbyte(message, offset + 2),
+             ssub(message, offset + 3, offset + 10)
            ),
            offset + 10
 
   elseif byte == 0xD8 then -- fixext 16
     return msgpack.Extension.new(
-             message:byte(offset + 2),
-             message:sub(offset + 3, offset + 18)
+             sbyte(message, offset + 2),
+             ssub(message, offset + 3, offset + 18)
            ),
            offset + 18
 
   elseif byte == 0xD9 then -- str 8
-    local length = message:byte(offset + 2)
-    return message:sub(offset + 3, offset + 2 + length),
+    local length = sbyte(message, offset + 2)
+    return ssub(message, offset + 3, offset + 2 + length),
            offset + 2 + length
 
   elseif byte == 0xDA then -- str 16
-    local i0,i1 = message:byte(offset + 2, offset + 3)
+    local i0,i1 = sbyte(message, offset + 2, offset + 3)
     local length = bor(
       lshift(i0, 8),
       i1
     )
 
-    return message:sub(offset + 4, offset + 3 + length),
+    return ssub(message, offset + 4, offset + 3 + length),
            offset + 3 + length
 
   elseif byte == 0xDB then -- str 32
-    local i0,i1,i2,i3 = message:byte(offset + 2, offset + 5)
+    local i0,i1,i2,i3 = sbyte(message, offset + 2, offset + 5)
     local length = bor(
       lshift(i0, 24),
       lshift(i1, 16),
@@ -276,11 +278,11 @@ local function parse(message: string, offset: number): (any, number)
       i3
     )
 
-    return message:sub(offset + 6, offset + 5 + length),
+    return ssub(message, offset + 6, offset + 5 + length),
            offset + 5 + length
 
   elseif byte == 0xDC then -- array 16
-    local i0,i1 = message:byte(offset + 2, offset + 3)
+    local i0,i1 = sbyte(message, offset + 2, offset + 3)
     local length = bor(
       lshift(i0, 8),
       i1
@@ -295,7 +297,7 @@ local function parse(message: string, offset: number): (any, number)
     return array, newOffset
 
   elseif byte == 0xDD then -- array 32
-    local i0,i1,i2,i3 = message:byte(offset + 2, offset + 5)
+    local i0,i1,i2,i3 = sbyte(message, offset + 2, offset + 5)
     local length = bor(
       lshift(i0, 24),
       lshift(i1, 16),
@@ -312,7 +314,7 @@ local function parse(message: string, offset: number): (any, number)
     return array, newOffset
 
   elseif byte == 0xDE then -- map 16
-    local i0,i1 = message:byte(offset + 2, offset + 3)
+    local i0,i1 = sbyte(message, offset + 2, offset + 3)
     local length = bor(
       lshift(i0, 8),
       i1
@@ -329,7 +331,7 @@ local function parse(message: string, offset: number): (any, number)
     return dictionary, newOffset
 
   elseif byte == 0xDF then -- map 32
-    local i0,i1,i2,i3 = message:byte(offset + 2, offset + 5)
+    local i0,i1,i2,i3 = sbyte(message, offset + 2, offset + 5)
     local length = bor(
       lshift(i0, 24),
       lshift(i1, 16),
@@ -379,7 +381,7 @@ local function parse(message: string, offset: number): (any, number)
 
   elseif byte - 0xA0 <= 0xBF - 0xA0 then -- fixstr
     local length = byte - 0xA0
-    return message:sub(offset + 2, offset + 1 + length),
+    return ssub(message, offset + 2, offset + 1 + length),
            offset + 1 + length
 
   end
