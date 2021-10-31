@@ -1,0 +1,26 @@
+{
+  "name": "msgpack-luau",
+  "tree": {
+    "$className": "DataModel",
+
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+
+      "msgpack": {
+        "$path": "src"
+      },
+
+      "Packages": {
+        "$path": "Packages"
+      }
+    },
+
+    "ServerScriptService": {
+      "$className": "ServerScriptService",
+
+      "TestRunner": {
+        "$path": "test-runner.server.lua"
+      }
+    }
+  }
+}

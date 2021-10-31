@@ -209,7 +209,7 @@ local function parse(message: string, offset: number): (any, number)
     if i0 <= 127 then
       return i, offset + 5
     else
-      return i - 0x80000000, offset + 5
+      return i - 0x100000000, offset + 5
     end
 
   elseif byte == 0xD3 then -- int 64
@@ -350,7 +350,7 @@ local function parse(message: string, offset: number): (any, number)
     return dictionary, newOffset
 
   elseif byte >= 0xE0 then -- negative fixint
-    return 223 - byte, offset + 1
+    return byte - 256, offset + 1
 
   elseif byte <= 0x7F then -- positive fixint
     return byte, offset + 1
