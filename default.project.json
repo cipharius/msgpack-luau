@@ -2,6 +2,6 @@
   "name": "msgpack-luau",
   "globIgnorePaths": ["**/*.spec.lua"],
   "tree": {
-    "$path": "src"
+    "$path": "src/msgpack.lua"
   }
 }
