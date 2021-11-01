@@ -61,8 +61,8 @@ To construct the benchmarking place, the following shell command was used: `rojo
     - [x] Unit test
   - [x] Boolean
     - [x] Unit test
-  - [ ] Int
-    - [ ] Unit test
+  - [x] Int
+    - [x] Unit test
   - [ ] Float
     - [ ] Unit test
   - [x] String

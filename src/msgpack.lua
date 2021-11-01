@@ -6,6 +6,7 @@ local bor = bit32.bor
 local lshift = bit32.lshift
 local extract = bit32.extract
 local ldexp = math.ldexp
+local modf = math.modf
 local sbyte = string.byte
 local ssub = string.sub
 local char = string.char
@@ -426,7 +427,56 @@ local function encode(data: any): string
     error("Too long string")
 
   elseif type(data) == "number" then
-    return -- TODO
+    local integral, fractional = modf(data)
+
+    if fractional == 0 then
+      local sign = math.sign(integral)
+
+      if sign >= 0 then
+        if integral <= 127 then -- positive fixint
+          return char(integral)
+        elseif integral <= 0xFF then -- uint 8
+          return "\xCC" .. char(integral)
+        elseif integral <= 0xFFFF then -- uint 16
+          return concat({
+            "\xCD",
+            char(extract(integral, 8, 8)),
+            char(extract(integral, 0, 8))
+          })
+        elseif integral <= 0xFFFFFFFF then -- uint 32
+          return concat({
+            "\xCE",
+            char(extract(integral, 24, 8)),
+            char(extract(integral, 16, 8)),
+            char(extract(integral, 8, 8)),
+            char(extract(integral, 0, 8))
+          })
+        end
+      else
+        if integral >= -0x20 then -- negative fixint
+          return char(bor(0xE0, extract(integral, 0, 5)))
+        elseif integral >= -0x80 then -- int 8
+          return "\xD0" .. char(extract(integral, 0, 8))
+        elseif integral >= -0x8000 then -- int 16
+          return concat({
+            "\xD1",
+            char(extract(integral, 8, 8)),
+            char(extract(integral, 0, 8))
+          })
+        elseif integral >= -0x80000000 then -- int 32
+          return concat({
+            "\xD2",
+            char(extract(integral, 24, 8)),
+            char(extract(integral, 16, 8)),
+            char(extract(integral, 8, 8)),
+            char(extract(integral, 0, 8))
+          })
+        end
+      end
+    end
+
+    -- TODO float 32
+    -- TODO float 64
 
   elseif type(data) == "table" then
     local msgpackType = data._msgpackType
