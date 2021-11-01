@@ -57,16 +57,16 @@ To construct the benchmarking place, the following shell command was used: `rojo
   - [ ] Timestamp extension
     - [ ] Unit test
 - [ ] Encoding
-  - [ ] Nil
-    - [ ] Unit test
-  - [ ] Boolean
-    - [ ] Unit test
+  - [x] Nil
+    - [x] Unit test
+  - [x] Boolean
+    - [x] Unit test
   - [ ] Int
     - [ ] Unit test
   - [ ] Float
     - [ ] Unit test
-  - [ ] String
-    - [ ] Unit test
+  - [x] String
+    - [x] Unit test
   - [ ] ByteArray (binary data)
     - [ ] Unit test
   - [ ] Array

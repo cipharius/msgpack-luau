@@ -8,6 +8,8 @@ local extract = bit32.extract
 local ldexp = math.ldexp
 local sbyte = string.byte
 local ssub = string.sub
+local char = string.char
+local concat = table.concat
 
 local function parse(message: string, offset: number): (any, number)
   local byte = sbyte(message, offset + 1, offset + 1)
@@ -389,6 +391,62 @@ local function parse(message: string, offset: number): (any, number)
   error("Not all decoder cases are handled")
 end
 
+local function encode(data: any): string
+  if data == nil then
+    return "\xC0"
+  elseif data == false then
+    return "\xC2"
+  elseif data == true then
+    return "\xC3"
+  elseif type(data) == "string" then
+    local length = #data
+
+    if length <= 31 then
+      return char(bor(0xA0, length)) .. data
+    elseif length <= 0xFF then
+      return "\xD9" .. char(length) .. data
+    elseif length <= 0xFFFF then
+      return concat({
+        "\xDA",
+        char(extract(length, 8, 8)),
+        char(extract(length, 0, 8)),
+        data
+      })
+    elseif length <= 0xFFFFFFFF then
+      return concat({
+        "\xDB",
+        char(extract(length, 24, 8)),
+        char(extract(length, 16, 8)),
+        char(extract(length, 8, 8)),
+        char(extract(length, 0, 8)),
+        data
+      })
+    end
+
+    error("Too long string")
+
+  elseif type(data) == "number" then
+    return -- TODO
+
+  elseif type(data) == "table" then
+    local msgpackType = data._msgpackType
+
+    if msgpackType then
+      if msgpackType == msgpack.Int64 then
+        return -- TODO
+      elseif msgpackType == msgpack.UInt64 then
+        return -- TODO
+      elseif msgpackType == msgpack.Extension then
+        return -- TODO
+      elseif msgpackType == msgpack.ByteArray then
+        return -- TODO
+      end
+    end
+
+    return -- TODO
+  end
+end
+
 msgpack.Int64 = {}
 
 function msgpack.Int64.new(mostSignificantPart: number, leastSignificantPart: number): Int64
@@ -436,7 +494,7 @@ function msgpack.decode(message: string): any
 end
 
 function msgpack.encode(data: any): string
-  error("Stub")
+  return encode(data)
 end
 
 export type Int64     = { _msgpackType: typeof(msgpack.Int64), mostSignificantPart: number, leastSignificantPart: number }

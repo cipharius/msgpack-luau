@@ -353,5 +353,30 @@ return function()
   end)
 
   describe("encode", function()
+    it("can encode nil value", function()
+      expect(msgpack.encode(nil)).to.equal("\xC0")
+    end)
+
+    it("can encode false value", function()
+      expect(msgpack.encode(false)).to.equal("\xC2")
+    end)
+
+    it("can encode true value", function()
+      expect(msgpack.encode(true)).to.equal("\xC3")
+    end)
+
+    it("can encode string value", function()
+      expect(msgpack.encode("")).to.equal("\xA0")
+      expect(msgpack.encode("xyz")).to.equal("\xA3\x78\x79\x7A")
+
+      local xs = string.rep("x", 0x20)
+      expect(msgpack.encode(xs)).to.equal("\xD9\x20" .. xs)
+
+      xs = string.rep("x", 0x100)
+      expect(msgpack.encode(xs)).to.equal("\xDA\x01\x00" .. xs)
+
+      xs = string.rep("x", 0x10000)
+      expect(msgpack.encode(xs)).to.equal("\xDB\x00\x01\x00\x00" .. xs)
+    end)
   end)
 end
