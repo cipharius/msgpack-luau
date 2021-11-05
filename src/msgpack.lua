@@ -518,10 +518,20 @@ local function encode(data: any): string
     local msgpackType = data._msgpackType
 
     if msgpackType then
-      if msgpackType == msgpack.Int64 then
-        return -- TODO
-      elseif msgpackType == msgpack.UInt64 then
-        return -- TODO
+      if msgpackType == msgpack.Int64 or msgpackType == msgpack.UInt64 then
+        local mostSignificantPart = data.mostSignificantPart
+        local leastSignificantPart = data.leastSignificantPart
+        return concat({
+          if msgpackType == msgpack.UInt64 then "\xCF" else "\xD3",
+          char(extract(mostSignificantPart, 24, 8)),
+          char(extract(mostSignificantPart, 16, 8)),
+          char(extract(mostSignificantPart, 8, 8)),
+          char(extract(mostSignificantPart, 0, 8)),
+          char(extract(leastSignificantPart, 24, 8)),
+          char(extract(leastSignificantPart, 16, 8)),
+          char(extract(leastSignificantPart, 8, 8)),
+          char(extract(leastSignificantPart, 0, 8)),
+        })
       elseif msgpackType == msgpack.Extension then
         return -- TODO
       elseif msgpackType == msgpack.ByteArray then

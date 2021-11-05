@@ -428,5 +428,12 @@ return function()
       expect(hex(msgpack.encode(2.2250738585072014e-308))).to.equal("CB 00 10 00 00 00 00 00 00")
       expect(hex(msgpack.encode(-2.2250738585072014e-308))).to.equal("CB 80 10 00 00 00 00 00 00")
     end)
+
+    it("can encode Int64 and UInt64 representations", function()
+      expect(hex(msgpack.encode(msgpack.Int64.new(0xFFFFFFFF, 0xFFFFFFFF)))).to.equal("D3 FF FF FF FF FF FF FF FF")
+      expect(hex(msgpack.encode(msgpack.Int64.new(0xFAFBFCFD, 0xFEFDFCFB)))).to.equal("D3 FA FB FC FD FE FD FC FB")
+      expect(hex(msgpack.encode(msgpack.UInt64.new(0xFFFFFFFF, 0xFFFFFFFF)))).to.equal("CF FF FF FF FF FF FF FF FF")
+      expect(hex(msgpack.encode(msgpack.UInt64.new(0xFAFBFCFD, 0xFEFDFCFB)))).to.equal("CF FA FB FC FD FE FD FC FB")
+    end)
   end)
 end
