@@ -533,7 +533,43 @@ local function encode(data: any): string
           char(extract(leastSignificantPart, 0, 8)),
         })
       elseif msgpackType == msgpack.Extension then
-        return -- TODO
+        local extensionData = data.data
+        local extensionType = data.type
+        local length = #extensionData
+
+        if length == 1 then
+          return "\xD4" .. char(extensionType) .. extensionData
+        elseif length == 2 then
+          return "\xD5" .. char(extensionType) .. extensionData
+        elseif length == 4 then
+          return "\xD6" .. char(extensionType) .. extensionData
+        elseif length == 8 then
+          return "\xD7" .. char(extensionType) .. extensionData
+        elseif length == 16 then
+          return "\xD8" .. char(extensionType) .. extensionData
+        elseif length <= 0xFF then
+          return "\xC7" .. char(length)  .. char(extensionType) .. extensionData
+        elseif length <= 0xFFFF then
+          return concat({
+            "\xC8",
+            char(extract(length, 8, 8)),
+            char(extract(length, 0, 8)),
+            char(extensionType),
+            extensionData
+          })
+        elseif length <= 0xFFFFFFFF then
+          return concat({
+            "\xC9",
+            char(extract(length, 24, 8)),
+            char(extract(length, 16, 8)),
+            char(extract(length, 8, 8)),
+            char(extract(length, 0, 8)),
+            char(extensionType),
+            extensionData
+          })
+        end
+
+        error("Too long extension data")
       elseif msgpackType == msgpack.ByteArray then
         data = data.data
         local length = #data

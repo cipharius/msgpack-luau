@@ -449,5 +449,23 @@ return function()
       xs = string.rep("x", 0x10000)
       expect(msgpack.encode(msgpack.ByteArray.new(xs))).to.equal("\xC6\x00\x01\x00\x00" .. xs)
     end)
+
+    it("can encode Extension value", function()
+      expect(hex(msgpack.encode(msgpack.Extension.new(123, "")))).to.equal("C7 00 7B")
+      expect(hex(msgpack.encode(msgpack.Extension.new(123, "x")))).to.equal("D4 7B 78")
+      expect(hex(msgpack.encode(msgpack.Extension.new(123, "xy")))).to.equal("D5 7B 78 79")
+      expect(hex(msgpack.encode(msgpack.Extension.new(123, "wxyz")))).to.equal("D6 7B 77 78 79 7A")
+      expect(hex(msgpack.encode(msgpack.Extension.new(123, "wxyzwxyz")))).to.equal("D7 7B 77 78 79 7A 77 78 79 7A")
+      expect(hex(msgpack.encode(msgpack.Extension.new(123, "wxyzwxyzwxyzwxyz")))).to.equal("D8 7B 77 78 79 7A 77 78 79 7A 77 78 79 7A 77 78 79 7A")
+
+      local xs = string.rep("x", 0x20)
+      expect(msgpack.encode(msgpack.Extension.new(123, xs))).to.equal("\xC7\x20\x7B" .. xs)
+
+      xs = string.rep("x", 0x100)
+      expect(msgpack.encode(msgpack.Extension.new(123, xs))).to.equal("\xC8\x01\x00\x7B" .. xs)
+
+      xs = string.rep("x", 0x10000)
+      expect(msgpack.encode(msgpack.Extension.new(123, xs))).to.equal("\xC9\x00\x01\x00\x00\x7B" .. xs)
+    end)
   end)
 end
