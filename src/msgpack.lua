@@ -6,7 +6,10 @@ local bor = bit32.bor
 local lshift = bit32.lshift
 local extract = bit32.extract
 local ldexp = math.ldexp
+local frexp = math.frexp
+local floor = math.floor
 local modf = math.modf
+local sign = math.sign
 local sbyte = string.byte
 local ssub = string.sub
 local char = string.char
@@ -427,12 +430,21 @@ local function encode(data: any): string
     error("Too long string")
 
   elseif type(data) == "number" then
+    -- represents NaN, Inf, -Inf as float 32 to save space
+    if data == 0 then
+      return "\x00"
+    elseif data ~= data then -- NaN
+      return "\xCA\x7F\x80\x00\x01"
+    elseif data == math.huge then
+      return "\xCA\x7F\x80\x00\x00"
+    elseif data == -math.huge then
+      return "\xCA\xFF\x80\x00\x00"
+    end
+
     local integral, fractional = modf(data)
-
+    local sign = sign(data)
     if fractional == 0 then
-      local sign = math.sign(integral)
-
-      if sign >= 0 then
+      if sign > 0 then
         if integral <= 127 then -- positive fixint
           return char(integral)
         elseif integral <= 0xFF then -- uint 8
@@ -475,8 +487,32 @@ local function encode(data: any): string
       end
     end
 
-    -- TODO float 32
-    -- TODO float 64
+    -- float 64
+    local mantissa, exponent = frexp(sign * data)
+    exponent = exponent - 1 + 1023
+    local mostSignificantPart, leastSignificantPart = modf(2*(mantissa - 0.5) * 0x1000000)
+    leastSignificantPart = floor(leastSignificantPart * 0x10000000)
+
+    return concat({
+      "\xCB",
+      char(bor(
+        lshift((1 - sign)/2, 7),
+        extract(exponent, 4, 7)
+      )),
+      char(bor(
+        lshift(extract(exponent, 0, 4), 4),
+        extract(mostSignificantPart, 20, 4)
+      )),
+      char(extract(mostSignificantPart, 12, 8)),
+      char(extract(mostSignificantPart, 4, 8)),
+      char(bor(
+        lshift(extract(mostSignificantPart, 0, 4), 4),
+        extract(leastSignificantPart, 24, 4)
+      )),
+      char(extract(leastSignificantPart, 16, 8)),
+      char(extract(leastSignificantPart, 8, 8)),
+      char(extract(leastSignificantPart, 0, 8))
+    })
 
   elseif type(data) == "table" then
     local msgpackType = data._msgpackType

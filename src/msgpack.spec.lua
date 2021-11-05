@@ -1,3 +1,17 @@
+local function hex(str)
+  local result = table.create(2*#str - 1)
+
+  for i=1,#str do
+    result[2*(i-1)+1] = string.format("%02X", string.byte(str, i))
+
+    if i ~= #str then
+      result[2*(i-1)+2] = " "
+    end
+  end
+
+  return table.concat(result)
+end
+
 return function()
   local msgpack = require(script.Parent.msgpack)
 
@@ -400,6 +414,19 @@ return function()
       expect(msgpack.encode(-32768)).to.equal("\xD1\x80\x00")
       expect(msgpack.encode(-32769)).to.equal("\xD2\xFF\xFF\x7F\xFF")
       expect(msgpack.encode(-2147483648)).to.equal("\xD2\x80\x00\x00\x00")
+    end)
+
+    it("can encode floating points", function()
+      expect(hex(msgpack.encode(0 / 0))).to.equal("CA 7F 80 00 01")
+      expect(hex(msgpack.encode(math.huge))).to.equal("CA 7F 80 00 00")
+      expect(hex(msgpack.encode(-math.huge))).to.equal("CA FF 80 00 00")
+      expect(hex(msgpack.encode(0.1))).to.equal("CB 3F B9 99 99 99 99 99 9A")
+      expect(hex(msgpack.encode(-0.1))).to.equal("CB BF B9 99 99 99 99 99 9A")
+      expect(hex(msgpack.encode(1234.56789))).to.equal("CB 40 93 4A 45 84 F4 C6 E7")
+      expect(hex(msgpack.encode(1.7976931348623157e+308))).to.equal("CB 7F EF FF FF FF FF FF FF")
+      expect(hex(msgpack.encode(-1.7976931348623157e+308))).to.equal("CB FF EF FF FF FF FF FF FF")
+      expect(hex(msgpack.encode(2.2250738585072014e-308))).to.equal("CB 00 10 00 00 00 00 00 00")
+      expect(hex(msgpack.encode(-2.2250738585072014e-308))).to.equal("CB 80 10 00 00 00 00 00 00")
     end)
   end)
 end
