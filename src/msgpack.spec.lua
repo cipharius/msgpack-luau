@@ -435,5 +435,19 @@ return function()
       expect(hex(msgpack.encode(msgpack.UInt64.new(0xFFFFFFFF, 0xFFFFFFFF)))).to.equal("CF FF FF FF FF FF FF FF FF")
       expect(hex(msgpack.encode(msgpack.UInt64.new(0xFAFBFCFD, 0xFEFDFCFB)))).to.equal("CF FA FB FC FD FE FD FC FB")
     end)
+
+    it("can encode ByteArray value", function()
+      expect(hex(msgpack.encode(msgpack.ByteArray.new("")))).to.equal("C4 00")
+      expect(hex(msgpack.encode(msgpack.ByteArray.new("xyz")))).to.equal("C4 03 78 79 7A")
+
+      local xs = string.rep("x", 0x20)
+      expect(msgpack.encode(msgpack.ByteArray.new(xs))).to.equal("\xC4\x20" .. xs)
+
+      xs = string.rep("x", 0x100)
+      expect(msgpack.encode(msgpack.ByteArray.new(xs))).to.equal("\xC5\x01\x00" .. xs)
+
+      xs = string.rep("x", 0x10000)
+      expect(msgpack.encode(msgpack.ByteArray.new(xs))).to.equal("\xC6\x00\x01\x00\x00" .. xs)
+    end)
   end)
 end

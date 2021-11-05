@@ -535,7 +535,30 @@ local function encode(data: any): string
       elseif msgpackType == msgpack.Extension then
         return -- TODO
       elseif msgpackType == msgpack.ByteArray then
-        return -- TODO
+        data = data.data
+        local length = #data
+
+        if length <= 0xFF then
+          return "\xC4" .. char(length) .. data
+        elseif length <= 0xFFFF then
+          return concat({
+            "\xC5",
+            char(extract(length, 8, 8)),
+            char(extract(length, 0, 8)),
+            data
+          })
+        elseif length <= 0xFFFFFFFF then
+          return concat({
+            "\xC6",
+            char(extract(length, 24, 8)),
+            char(extract(length, 16, 8)),
+            char(extract(length, 8, 8)),
+            char(extract(length, 0, 8)),
+            data
+          })
+        end
+
+        error("Too long BinaryArray")
       end
     end
 
