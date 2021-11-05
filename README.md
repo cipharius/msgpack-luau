@@ -63,8 +63,8 @@ To construct the benchmarking place, the following shell command was used: `rojo
     - [x] Unit test
   - [x] Int
     - [x] Unit test
-  - [ ] Float
-    - [ ] Unit test
+  - [x] Float
+    - [x] Unit test
   - [x] String
     - [x] Unit test
   - [ ] ByteArray (binary data)
