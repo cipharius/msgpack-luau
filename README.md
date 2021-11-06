@@ -35,45 +35,4 @@ To construct the benchmarking place, the following shell command was used: `rojo
 
 ## State of project
 
-- [ ] Decoding
-  - [x] Nil
-    - [x] Unit test
-  - [x] Boolean
-    - [x] Unit test
-  - [x] Int
-    - [x] Unit test
-  - [x] Float
-    - [x] Unit test
-  - [x] String
-    - [x] Unit test
-  - [x] ByteArray (binary data)
-    - [x] Unit test
-  - [x] Array
-    - [x] Unit test
-  - [x] Map (dictionary)
-    - [x] Unit test
-  - [x] Extension
-    - [x] Unit test
-  - [ ] Timestamp extension
-    - [ ] Unit test
-- [ ] Encoding
-  - [x] Nil
-    - [x] Unit test
-  - [x] Boolean
-    - [x] Unit test
-  - [x] Int
-    - [x] Unit test
-  - [x] Float
-    - [x] Unit test
-  - [x] String
-    - [x] Unit test
-  - [x] ByteArray (binary data)
-    - [x] Unit test
-  - [x] Array
-    - [x] Unit test
-  - [x] Map (dictionary)
-    - [x] Unit test
-  - [x] Extension
-    - [x] Unit test
-  - [ ] Timestamp extension
-    - [ ] Unit test
+Encoding and decoding fully works, extensions are currently not specially treated.
