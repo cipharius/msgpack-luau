@@ -598,8 +598,73 @@ local function encode(data: any): string
       end
     end
 
-    return -- TODO
+    local length = #data
+    local encodedValues = table.create(length)
+    local mapLength = 0
+
+    for i,value in pairs(data) do
+      encodedValues[i] = encode(value)
+      mapLength += 1
+    end
+
+    if length == mapLength then -- array
+      if length <= 15 then
+        return char(bor(0x90, length)) .. concat(encodedValues)
+      elseif length <= 0xFFFF then
+        return concat({
+          "\xDC",
+          char(extract(length, 8, 8)),
+          char(extract(length, 0, 8)),
+          concat(encodedValues)
+        })
+      elseif length <= 0xFFFFFFFF then
+        return concat({
+          "\xDD",
+          char(extract(length, 24, 8)),
+          char(extract(length, 16, 8)),
+          char(extract(length, 8, 8)),
+          char(extract(length, 0, 8)),
+          concat(encodedValues)
+        })
+      end
+
+      error("Too long array")
+
+    else -- map
+      local encodedMap = table.create(mapLength)
+
+      local i = 1
+      for key,value in pairs(encodedValues) do
+        encodedMap[i] = encode(key)
+        encodedMap[i+1] = value
+        i += 2
+      end
+
+      if mapLength <= 15 then
+        return char(bor(0x80, mapLength)) .. concat(encodedMap)
+      elseif mapLength <= 0xFFFF then
+        return concat({
+          "\xDE",
+          char(extract(mapLength, 8, 8)),
+          char(extract(mapLength, 0, 8)),
+          concat(encodedMap)
+        })
+      elseif mapLength <= 0xFFFFFFFF then
+        return concat({
+          "\xDF",
+          char(extract(mapLength, 24, 8)),
+          char(extract(mapLength, 16, 8)),
+          char(extract(mapLength, 8, 8)),
+          char(extract(mapLength, 0, 8)),
+          concat(encodedMap)
+        })
+      end
+
+      error("Too long map")
+    end
   end
+
+  error("Not all encoder cases are handled")
 end
 
 msgpack.Int64 = {}

@@ -467,5 +467,33 @@ return function()
       xs = string.rep("x", 0x10000)
       expect(msgpack.encode(msgpack.Extension.new(123, xs))).to.equal("\xC9\x00\x01\x00\x00\x7B" .. xs)
     end)
+
+    it("can encode array-like tables", function()
+      expect(hex(msgpack.encode({}))).to.equal("90")
+      expect(hex(msgpack.encode({1,2,3}))).to.equal("93 01 02 03")
+
+      local t,s = table.create(15, 0), string.rep("\x00", 15)
+      expect(msgpack.encode(t)).to.equal("\x9F" .. s)
+
+      t,s = table.create(30, 0), string.rep("\x00", 30)
+      expect(msgpack.encode(t)).to.equal("\xDC\x00\x1E" .. s)
+
+      t,s = table.create(70000, 0), string.rep("\x00", 70000)
+      expect(msgpack.encode(t)).to.equal("\xDD\x00\x01\x11\x70" .. s)
+    end)
+
+    it("can encode map-like tables", function()
+      expect(hex(msgpack.encode({a=1}))).to.equal("81 A1 61 01")
+      expect(hex(msgpack.encode({1, a=1}))).to.equal("82 01 01 A1 61 01")
+
+      local t,s = table.create(15, 0), string.rep("\x00", 15)
+      expect(msgpack.encode(t)).to.equal("\x9F" .. s)
+
+      t,s = table.create(30, 0), string.rep("\x00", 30)
+      expect(msgpack.encode(t)).to.equal("\xDC\x00\x1E" .. s)
+
+      t,s = table.create(70000, 0), string.rep("\x00", 70000)
+      expect(msgpack.encode(t)).to.equal("\xDD\x00\x01\x11\x70" .. s)
+    end)
   end)
 end

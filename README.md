@@ -69,10 +69,10 @@ To construct the benchmarking place, the following shell command was used: `rojo
     - [x] Unit test
   - [x] ByteArray (binary data)
     - [x] Unit test
-  - [ ] Array
-    - [ ] Unit test
-  - [ ] Map (dictionary)
-    - [ ] Unit test
+  - [x] Array
+    - [x] Unit test
+  - [x] Map (dictionary)
+    - [x] Unit test
   - [x] Extension
     - [x] Unit test
   - [ ] Timestamp extension
