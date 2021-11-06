@@ -8,15 +8,38 @@ A pure MessagePack binary serialization format implementation in Luau.
 * Be on par with HttpService's `JSONEncode` and `JSONDecode` performance wise
 * Keep code readable as long as it does not get in the way of prior goals
 
-## Usage
+## Example usage
 
-Decoding:
 ```lua
 local msgpack = require(path.to.msgpack)
-local message = "\x92\xA5hello\xA5world"
+local message = msgpack.encode({"hello", "world", 123, key="value"})
 
 print(msgpack.decode(message))
 ```
+
+## API
+
+* `msgpack.encode(data: any): string`
+  Encodes any pure Luau datatype in MessagePack binary string format.
+  It does not currently handle any Roblox specific datatypes.
+
+* `msgpack.decode(message: string): any`
+  Decodes MessagePack binary string as pure Luau value.
+
+* `msgpack.ByteArray.new(blob: string): msgpack.ByteArray`
+  Wraps a string value in order to represent MessagePack `bin` datatype.
+
+* `msgpack.Extension.new(extensionType: number, blob: string): msgpack.Extension`
+  Create MessagePack extension type, which is used for custom datatype serialization purposes.
+  First argument `extensionType` must be an integer.
+
+* `msgpack.Int64.new(mostSignificantPart: number, leastSignificantPart: number): msgpack.Int64`
+  Represents 64-bit signed integer, which is too large to to represent as Luau integer.
+  Both arguments must be integers.
+
+* `msgpack.UInt64.new(mostSignificantPart: number, leastSignificantPart: number): msgpack.UInt64`
+  Represents 64-bit unsigned integer, which is too large to to represent as Luau integer.
+  Both arguments must be integers.
 
 ## Performance
 
