@@ -20,24 +20,30 @@ print(msgpack.decode(message))
 ## API
 
 * `msgpack.encode(data: any): string`
+
   Encodes any pure Luau datatype in MessagePack binary string format.
   It does not currently handle any Roblox specific datatypes.
 
 * `msgpack.decode(message: string): any`
+
   Decodes MessagePack binary string as pure Luau value.
 
 * `msgpack.ByteArray.new(blob: string): msgpack.ByteArray`
+
   Wraps a string value in order to represent MessagePack `bin` datatype.
 
 * `msgpack.Extension.new(extensionType: number, blob: string): msgpack.Extension`
+
   Create MessagePack extension type, which is used for custom datatype serialization purposes.
   First argument `extensionType` must be an integer.
 
 * `msgpack.Int64.new(mostSignificantPart: number, leastSignificantPart: number): msgpack.Int64`
+
   Represents 64-bit signed integer, which is too large to to represent as Luau integer.
   Both arguments must be integers.
 
 * `msgpack.UInt64.new(mostSignificantPart: number, leastSignificantPart: number): msgpack.UInt64`
+
   Represents 64-bit unsigned integer, which is too large to to represent as Luau integer.
   Both arguments must be integers.
 
