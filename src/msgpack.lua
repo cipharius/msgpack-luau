@@ -631,7 +631,7 @@ local function encode(data: any): string
       error("Too long array")
 
     else -- map
-      local encodedMap = table.create(mapLength)
+      local encodedMap = table.create(2*mapLength)
 
       local i = 1
       for key,value in pairs(encodedValues) do
