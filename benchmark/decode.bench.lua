@@ -3,11 +3,8 @@ local msgpack = require(game.ReplicatedStorage.msgpack)
 local httpService = game:GetService("HttpService")
 local msgpackDecode = msgpack.decode
 
-local jsonMessage = require(script.JsonMessage)
-local msgpackMessage = require(script.MsgpackMessage)
-
-print("JSON message length:", #jsonMessage)
-print("Msgpack message length:", #msgpackMessage)
+local jsonMessage = require(game.ServerStorage.JsonMessage)
+local msgpackMessage = require(game.ServerStorage.MsgpackMessage)
 
 return {
 

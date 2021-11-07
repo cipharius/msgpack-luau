@@ -53,6 +53,14 @@ For MessagePack encoding [an online msgpack-lite encoder](https://kawanet.github
 As visible in the [boatbomber's benchmarker plugin](https://devforum.roblox.com/t/benchmarker-plugin-compare-function-speeds-with-graphs-percentiles-and-more/829912) results, `msgpack.decode` considerably exceeds `JSONDecode` performance:
 ![Figure with JSONDecode and msgpack.decode benchmark results](./assets/decode-benchmark.png)
 
+To benchmark module's encoding performance same data is used as previously.
+It is first decoded as table structure then both `msgpack.encode` and `JSONEncode` encode it with the following results:
+![Figure with JSONEncode and msgpack.encode benchmark results](./assets/encode-benchmark.png)
+
+MessagePack encoder currently slower than JSONEncode, although they remain pretty close.
+Here is another benchmark which combines both decoding and encoding steps:
+![Figure with "JSONEncode & JSONDecode" and "msgpack.encode & msgpack.decode" benchmark results](./assets/decode-encode-benchmark.png)
+
 For more details on the benchmark setup, look into `./benchmark` directory.
 To construct the benchmarking place, the following shell command was used: `rojo build -o benchmark.rbxl benchmark.project.json`
 
