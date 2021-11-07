@@ -410,21 +410,17 @@ local function encode(data: any): string
     elseif length <= 0xFF then
       return "\xD9" .. char(length) .. data
     elseif length <= 0xFFFF then
-      return concat({
-        "\xDA",
-        char(extract(length, 8, 8)),
-        char(extract(length, 0, 8)),
+      return "\xDA" ..
+        char(extract(length, 8, 8)) ..
+        char(extract(length, 0, 8)) ..
         data
-      })
     elseif length <= 0xFFFFFFFF then
-      return concat({
-        "\xDB",
-        char(extract(length, 24, 8)),
-        char(extract(length, 16, 8)),
-        char(extract(length, 8, 8)),
-        char(extract(length, 0, 8)),
+      return "\xDB" ..
+        char(extract(length, 24, 8)) ..
+        char(extract(length, 16, 8)) ..
+        char(extract(length, 8, 8)) ..
+        char(extract(length, 0, 8)) ..
         data
-      })
     end
 
     error("Too long string")
@@ -450,19 +446,15 @@ local function encode(data: any): string
         elseif integral <= 0xFF then -- uint 8
           return "\xCC" .. char(integral)
         elseif integral <= 0xFFFF then -- uint 16
-          return concat({
-            "\xCD",
-            char(extract(integral, 8, 8)),
+          return "\xCD" ..
+            char(extract(integral, 8, 8)) ..
             char(extract(integral, 0, 8))
-          })
         elseif integral <= 0xFFFFFFFF then -- uint 32
-          return concat({
-            "\xCE",
-            char(extract(integral, 24, 8)),
-            char(extract(integral, 16, 8)),
-            char(extract(integral, 8, 8)),
+          return "\xCE" ..
+            char(extract(integral, 24, 8)) ..
+            char(extract(integral, 16, 8)) ..
+            char(extract(integral, 8, 8)) ..
             char(extract(integral, 0, 8))
-          })
         end
       else
         if integral >= -0x20 then -- negative fixint
@@ -470,19 +462,15 @@ local function encode(data: any): string
         elseif integral >= -0x80 then -- int 8
           return "\xD0" .. char(extract(integral, 0, 8))
         elseif integral >= -0x8000 then -- int 16
-          return concat({
-            "\xD1",
-            char(extract(integral, 8, 8)),
+          return "\xD1" ..
+            char(extract(integral, 8, 8)) ..
             char(extract(integral, 0, 8))
-          })
         elseif integral >= -0x80000000 then -- int 32
-          return concat({
-            "\xD2",
-            char(extract(integral, 24, 8)),
-            char(extract(integral, 16, 8)),
-            char(extract(integral, 8, 8)),
+          return "\xD2" ..
+            char(extract(integral, 24, 8)) ..
+            char(extract(integral, 16, 8)) ..
+            char(extract(integral, 8, 8)) ..
             char(extract(integral, 0, 8))
-          })
         end
       end
     end
@@ -493,26 +481,24 @@ local function encode(data: any): string
     local mostSignificantPart, leastSignificantPart = modf(2*(mantissa - 0.5) * 0x1000000)
     leastSignificantPart = floor(leastSignificantPart * 0x10000000)
 
-    return concat({
-      "\xCB",
+    return "\xCB" ..
       char(bor(
         lshift((1 - sign)/2, 7),
         extract(exponent, 4, 7)
-      )),
+      )) ..
       char(bor(
         lshift(extract(exponent, 0, 4), 4),
         extract(mostSignificantPart, 20, 4)
-      )),
-      char(extract(mostSignificantPart, 12, 8)),
-      char(extract(mostSignificantPart, 4, 8)),
+      )) ..
+      char(extract(mostSignificantPart, 12, 8)) ..
+      char(extract(mostSignificantPart, 4, 8)) ..
       char(bor(
         lshift(extract(mostSignificantPart, 0, 4), 4),
         extract(leastSignificantPart, 24, 4)
-      )),
-      char(extract(leastSignificantPart, 16, 8)),
-      char(extract(leastSignificantPart, 8, 8)),
+      )) ..
+      char(extract(leastSignificantPart, 16, 8)) ..
+      char(extract(leastSignificantPart, 8, 8)) ..
       char(extract(leastSignificantPart, 0, 8))
-    })
 
   elseif type(data) == "table" then
     local msgpackType = data._msgpackType
@@ -521,17 +507,15 @@ local function encode(data: any): string
       if msgpackType == msgpack.Int64 or msgpackType == msgpack.UInt64 then
         local mostSignificantPart = data.mostSignificantPart
         local leastSignificantPart = data.leastSignificantPart
-        return concat({
-          if msgpackType == msgpack.UInt64 then "\xCF" else "\xD3",
-          char(extract(mostSignificantPart, 24, 8)),
-          char(extract(mostSignificantPart, 16, 8)),
-          char(extract(mostSignificantPart, 8, 8)),
-          char(extract(mostSignificantPart, 0, 8)),
-          char(extract(leastSignificantPart, 24, 8)),
-          char(extract(leastSignificantPart, 16, 8)),
-          char(extract(leastSignificantPart, 8, 8)),
-          char(extract(leastSignificantPart, 0, 8)),
-        })
+        return (if msgpackType == msgpack.UInt64 then "\xCF" else "\xD3") ..
+          char(extract(mostSignificantPart, 24, 8)) ..
+          char(extract(mostSignificantPart, 16, 8)) ..
+          char(extract(mostSignificantPart, 8, 8)) ..
+          char(extract(mostSignificantPart, 0, 8)) ..
+          char(extract(leastSignificantPart, 24, 8)) ..
+          char(extract(leastSignificantPart, 16, 8)) ..
+          char(extract(leastSignificantPart, 8, 8)) ..
+          char(extract(leastSignificantPart, 0, 8))
       elseif msgpackType == msgpack.Extension then
         local extensionData = data.data
         local extensionType = data.type
@@ -550,23 +534,19 @@ local function encode(data: any): string
         elseif length <= 0xFF then
           return "\xC7" .. char(length)  .. char(extensionType) .. extensionData
         elseif length <= 0xFFFF then
-          return concat({
-            "\xC8",
-            char(extract(length, 8, 8)),
-            char(extract(length, 0, 8)),
-            char(extensionType),
+          return "\xC8" ..
+            char(extract(length, 8, 8)) ..
+            char(extract(length, 0, 8)) ..
+            char(extensionType) ..
             extensionData
-          })
         elseif length <= 0xFFFFFFFF then
-          return concat({
-            "\xC9",
-            char(extract(length, 24, 8)),
-            char(extract(length, 16, 8)),
-            char(extract(length, 8, 8)),
-            char(extract(length, 0, 8)),
-            char(extensionType),
+          return "\xC9" ..
+            char(extract(length, 24, 8)) ..
+            char(extract(length, 16, 8)) ..
+            char(extract(length, 8, 8)) ..
+            char(extract(length, 0, 8)) ..
+            char(extensionType) ..
             extensionData
-          })
         end
 
         error("Too long extension data")
@@ -577,21 +557,17 @@ local function encode(data: any): string
         if length <= 0xFF then
           return "\xC4" .. char(length) .. data
         elseif length <= 0xFFFF then
-          return concat({
-            "\xC5",
-            char(extract(length, 8, 8)),
-            char(extract(length, 0, 8)),
+          return "\xC5" ..
+            char(extract(length, 8, 8)) ..
+            char(extract(length, 0, 8)) ..
             data
-          })
         elseif length <= 0xFFFFFFFF then
-          return concat({
-            "\xC6",
-            char(extract(length, 24, 8)),
-            char(extract(length, 16, 8)),
-            char(extract(length, 8, 8)),
-            char(extract(length, 0, 8)),
+          return "\xC6" ..
+            char(extract(length, 24, 8)) ..
+            char(extract(length, 16, 8)) ..
+            char(extract(length, 8, 8)) ..
+            char(extract(length, 0, 8)) ..
             data
-          })
         end
 
         error("Too long BinaryArray")
@@ -611,21 +587,17 @@ local function encode(data: any): string
       if length <= 15 then
         return char(bor(0x90, length)) .. concat(encodedValues)
       elseif length <= 0xFFFF then
-        return concat({
-          "\xDC",
-          char(extract(length, 8, 8)),
-          char(extract(length, 0, 8)),
+        return "\xDC" ..
+          char(extract(length, 8, 8)) ..
+          char(extract(length, 0, 8)) ..
           concat(encodedValues)
-        })
       elseif length <= 0xFFFFFFFF then
-        return concat({
-          "\xDD",
-          char(extract(length, 24, 8)),
-          char(extract(length, 16, 8)),
-          char(extract(length, 8, 8)),
-          char(extract(length, 0, 8)),
+        return "\xDD" ..
+          char(extract(length, 24, 8)) ..
+          char(extract(length, 16, 8)) ..
+          char(extract(length, 8, 8)) ..
+          char(extract(length, 0, 8)) ..
           concat(encodedValues)
-        })
       end
 
       error("Too long array")
@@ -643,21 +615,17 @@ local function encode(data: any): string
       if mapLength <= 15 then
         return char(bor(0x80, mapLength)) .. concat(encodedMap)
       elseif mapLength <= 0xFFFF then
-        return concat({
-          "\xDE",
-          char(extract(mapLength, 8, 8)),
-          char(extract(mapLength, 0, 8)),
+        return "\xDE" ..
+          char(extract(mapLength, 8, 8)) ..
+          char(extract(mapLength, 0, 8)) ..
           concat(encodedMap)
-        })
       elseif mapLength <= 0xFFFFFFFF then
-        return concat({
-          "\xDF",
-          char(extract(mapLength, 24, 8)),
-          char(extract(mapLength, 16, 8)),
-          char(extract(mapLength, 8, 8)),
-          char(extract(mapLength, 0, 8)),
+        return "\xDF" ..
+          char(extract(mapLength, 24, 8)) ..
+          char(extract(mapLength, 16, 8)) ..
+          char(extract(mapLength, 8, 8)) ..
+          char(extract(mapLength, 0, 8)) ..
           concat(encodedMap)
-        })
       end
 
       error("Too long map")
