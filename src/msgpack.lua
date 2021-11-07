@@ -575,15 +575,19 @@ local function encode(data: any): string
     end
 
     local length = #data
-    local encodedValues = table.create(length)
     local mapLength = 0
 
     for i,value in pairs(data) do
-      encodedValues[i] = encode(value)
       mapLength += 1
     end
 
     if length == mapLength then -- array
+      local encodedValues = table.create(length)
+
+      for i,v in ipairs(data) do
+        encodedValues[i] = encode(v)
+      end
+
       if length <= 15 then
         return char(bor(0x90, length)) .. concat(encodedValues)
       elseif length <= 0xFFFF then
@@ -606,9 +610,9 @@ local function encode(data: any): string
       local encodedMap = table.create(2*mapLength)
 
       local i = 1
-      for key,value in pairs(encodedValues) do
-        encodedMap[i] = encode(key)
-        encodedMap[i+1] = value
+      for k,v in pairs(data) do
+        encodedMap[i] = encode(k)
+        encodedMap[i+1] = encode(v)
         i += 2
       end
 
