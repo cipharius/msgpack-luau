@@ -605,57 +605,69 @@ local function encode(data: any): string
     end
 
     if length == mapLength then -- array
-      local encodedValues = table.create(length)
+      local header
+      if length <= 15 then
+        header = char(bor(0x90, length))
+      elseif length <= 0xFFFF then
+        header = char(
+          0xDC,
+          extract(length, 8, 8),
+          extract(length, 0, 8)
+        )
+      elseif length <= 0xFFFFFFFF then
+        header = char(
+          0xDD,
+          extract(length, 24, 8),
+          extract(length, 16, 8),
+          extract(length, 8, 8),
+          extract(length, 0, 8)
+        )
+      else
+        error("Too long array")
+      end
+
+      local encodedValues = table.create(length + 1)
+      encodedValues[1] = header
 
       for i,v in ipairs(data) do
-        encodedValues[i] = encode(v)
+        encodedValues[i+1] = encode(v)
       end
 
-      if length <= 15 then
-        return char(bor(0x90, length)) .. concat(encodedValues)
-      elseif length <= 0xFFFF then
-        return "\xDC" ..
-          char(extract(length, 8, 8)) ..
-          char(extract(length, 0, 8)) ..
-          concat(encodedValues)
-      elseif length <= 0xFFFFFFFF then
-        return "\xDD" ..
-          char(extract(length, 24, 8)) ..
-          char(extract(length, 16, 8)) ..
-          char(extract(length, 8, 8)) ..
-          char(extract(length, 0, 8)) ..
-          concat(encodedValues)
-      end
-
-      error("Too long array")
+      return concat(encodedValues)
 
     else -- map
-      local encodedMap = table.create(2*mapLength)
+      local header
+      if mapLength <= 15 then
+        header = char(bor(0x80, mapLength))
+      elseif mapLength <= 0xFFFF then
+        header = char(
+          0xDE,
+          extract(mapLength, 8, 8),
+          extract(mapLength, 0, 8)
+        )
+      elseif mapLength <= 0xFFFFFFFF then
+        header = char(
+          0xDF,
+          extract(mapLength, 24, 8),
+          extract(mapLength, 16, 8),
+          extract(mapLength, 8, 8),
+          extract(mapLength, 0, 8)
+        )
+      else
+        error("Too long map")
+      end
 
-      local i = 1
+      local encodedPairs = tableCreate(2*mapLength + 1)
+      encodedPairs[1] = header
+
+      local i = 2
       for k,v in pairs(data) do
-        encodedMap[i] = encode(k)
-        encodedMap[i+1] = encode(v)
+        encodedPairs[i] = encode(k)
+        encodedPairs[i+1] = encode(v)
         i += 2
       end
 
-      if mapLength <= 15 then
-        return char(bor(0x80, mapLength)) .. concat(encodedMap)
-      elseif mapLength <= 0xFFFF then
-        return "\xDE" ..
-          char(extract(mapLength, 8, 8)) ..
-          char(extract(mapLength, 0, 8)) ..
-          concat(encodedMap)
-      elseif mapLength <= 0xFFFFFFFF then
-        return "\xDF" ..
-          char(extract(mapLength, 24, 8)) ..
-          char(extract(mapLength, 16, 8)) ..
-          char(extract(mapLength, 8, 8)) ..
-          char(extract(mapLength, 0, 8)) ..
-          concat(encodedMap)
-      end
-
-      error("Too long map")
+      return concat(encodedPairs)
     end
   end
 
