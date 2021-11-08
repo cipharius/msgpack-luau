@@ -65,8 +65,8 @@ To benchmark module's encoding performance same data is used as previously.
 It is first decoded as table structure then both `msgpack.encode` and `JSONEncode` encode it with the following results:
 ![Figure with JSONEncode and msgpack.encode benchmark results](./assets/encode-benchmark.png)
 
-MessagePack encoder currently slower than JSONEncode, although they remain pretty close.
-Here is another benchmark which combines both decoding and encoding steps:
+MessagePack encoder is bit less consistent as `JSONEncode`, but on average `msgpack.encode` is as performant as `JSONEncode`.
+Here is another benchmark which combines both decoding and encoding steps and as it can be seen, thanks to much greater `msgpack.decode` speed, both methods together perform better than built-in `JSONEncode` and `JSONDecode`:
 ![Figure with "JSONEncode & JSONDecode" and "msgpack.encode & msgpack.decode" benchmark results](./assets/decode-encode-benchmark.png)
 
 For more details on the benchmark setup, look into `./benchmark` directory.
