@@ -495,5 +495,13 @@ return function()
       t,s = table.create(70000, 0), string.rep("\x00", 70000)
       expect(msgpack.encode(t)).to.equal("\xDD\x00\x01\x11\x70" .. s)
     end)
+
+    it("can handle cyclic tables", function()
+      local cyclicTable = {}
+      cyclicTable.self = cyclicTable
+      expect(function()
+        msgpack.encode(cyclicTable)
+      end).to.throw("Can not serialize cyclic table")
+    end)
   end)
 end

@@ -396,7 +396,7 @@ local function parse(message: string, offset: number): (any, number)
   error("Not all decoder cases are handled")
 end
 
-local function encode(data: any): string
+local function encode(data: any, tableSet: {[any]: boolean}): string
   if data == nil then
     return "\xC0"
   elseif data == false then
@@ -597,6 +597,12 @@ local function encode(data: any): string
       end
     end
 
+    if tableSet[data] then
+      error("Can not serialize cyclic table")
+    else
+      tableSet[data] = true
+    end
+
     local length = #data
     local mapLength = 0
 
@@ -630,7 +636,7 @@ local function encode(data: any): string
       encodedValues[1] = header
 
       for i,v in ipairs(data) do
-        encodedValues[i+1] = encode(v)
+        encodedValues[i+1] = encode(v, tableSet)
       end
 
       return concat(encodedValues)
@@ -662,8 +668,8 @@ local function encode(data: any): string
 
       local i = 2
       for k,v in pairs(data) do
-        encodedPairs[i] = encode(k)
-        encodedPairs[i+1] = encode(v)
+        encodedPairs[i] = encode(k, tableSet)
+        encodedPairs[i+1] = encode(v, tableSet)
         i += 2
       end
 
@@ -721,7 +727,7 @@ function msgpack.decode(message: string): any
 end
 
 function msgpack.encode(data: any): string
-  return encode(data)
+  return encode(data, {})
 end
 
 export type Int64     = { _msgpackType: typeof(msgpack.Int64), mostSignificantPart: number, leastSignificantPart: number }
