@@ -1,4 +1,9 @@
+<!-- Images -->
+[shield wally release]: https://img.shields.io/endpoint?url=https://runkit.io/clockworksquirrel/wally-version-shield/branches/master/cipharius/msgpack-luau&color=blue&label=wally&style=flat
+
 # MessagePack for Luau
+
+[![Wally release (latest)][shield wally release]][latest release]
 
 A pure MessagePack binary serialization format implementation in Luau.
 
