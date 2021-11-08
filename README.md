@@ -3,7 +3,7 @@
 
 # MessagePack for Luau
 
-[![Wally release (latest)][shield wally release]][latest release]
+![Wally release (latest)][shield wally release]
 
 A pure MessagePack binary serialization format implementation in Luau.
 
