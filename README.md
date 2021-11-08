@@ -14,7 +14,9 @@ A pure MessagePack binary serialization format implementation in Luau.
 local msgpack = require(path.to.msgpack)
 local message = msgpack.encode({"hello", "world", 123, key="value"})
 
-print(msgpack.decode(message))
+for i,v in pairs(msgpack.decode(message)) do
+  print(i, v)
+end
 ```
 
 ## API
