@@ -17,7 +17,7 @@ return {
       local x = httpService:JSONDecode(jsonMessage)
       Profiler.End()
       Profiler.Begin("JSONEncode")
-      httpService:JSONEncode()
+      httpService:JSONEncode(x)
       Profiler.End()
     end,
 
