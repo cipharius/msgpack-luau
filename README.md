@@ -1,4 +1,4 @@
-<!-- Project links ->>
+<!-- Project links -->
 [latest release]: https://github.com/cipharius/msgpack-luau/releases/latest
 
 <!-- Images -->
