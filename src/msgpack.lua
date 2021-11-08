@@ -393,7 +393,7 @@ local function parse(message: string, offset: number): (any, number)
 
   end
 
-  error("Not all decoder cases are handled")
+  error("Not all decoder cases are handled, report as bug to msgpack-luau maintainer")
 end
 
 local function encode(data: any, tableSet: {[any]: boolean}): string
@@ -426,7 +426,7 @@ local function encode(data: any, tableSet: {[any]: boolean}): string
       ) .. data
     end
 
-    error("Too long string")
+    error("Could not encode - too long string")
 
   elseif type(data) == "number" then
     -- represents NaN, Inf, -Inf as float 32 to save space
@@ -570,7 +570,7 @@ local function encode(data: any, tableSet: {[any]: boolean}): string
           ) .. extensionData
         end
 
-        error("Too long extension data")
+        error("Could not encode - too long extension data")
       elseif msgpackType == msgpack.ByteArray then
         data = data.data
         local length = #data
@@ -593,7 +593,7 @@ local function encode(data: any, tableSet: {[any]: boolean}): string
           ) .. data
         end
 
-        error("Too long BinaryArray")
+        error("Could not encode - too long BinaryArray")
       end
     end
 
@@ -629,7 +629,7 @@ local function encode(data: any, tableSet: {[any]: boolean}): string
           extract(length, 0, 8)
         )
       else
-        error("Too long array")
+        error("Could not encode - too long array")
       end
 
       local encodedValues = table.create(length + 1)
@@ -660,7 +660,7 @@ local function encode(data: any, tableSet: {[any]: boolean}): string
           extract(mapLength, 0, 8)
         )
       else
-        error("Too long map")
+        error("Could not encode - too long map")
       end
 
       local encodedPairs = tableCreate(2*mapLength + 1)
@@ -677,7 +677,7 @@ local function encode(data: any, tableSet: {[any]: boolean}): string
     end
   end
 
-  error("Not all encoder cases are handled")
+  error(string.format("Could not encode - unsupported datatype \"%s\"", typeof(data)))
 end
 
 msgpack.Int64 = {}
@@ -721,7 +721,7 @@ end
 
 function msgpack.decode(message: string): any
   if message == "" then
-    error("Message is too short")
+    error("Could not decode - input string is too short")
   end
   return (parse(message, 0))
 end
