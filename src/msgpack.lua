@@ -719,6 +719,56 @@ function msgpack.Extension.new(extensionType: number, blob: string): Extension
   }
 end
 
+function msgpack.utf8Encode(message: string): string
+  local messageLength = #message
+  local nBytes = math.ceil(messageLength * (8 / 7))
+  local result = tableCreate(nBytes)
+
+  local bitPointer = 0
+  for i=1,nBytes do
+    local j = 1 + floor(bitPointer / 8)
+    local bitRemainder = bitPointer % 8
+    local byte = sbyte(message, j)
+
+    if bitRemainder == 0 then
+      result[i] = char(extract(byte, 1, 7))
+    elseif bitRemainder == 1 then
+      result[i] = char(extract(byte, 0, 7))
+    else
+      local nextByte = sbyte(message, j+1) or 0
+      result[i] = char(bor(
+        lshift(extract(byte, 0, 8 - bitRemainder), bitRemainder - 1),
+        extract(nextByte, 9 - bitRemainder, bitRemainder - 1)
+      ))
+    end
+
+    bitPointer += 7
+  end
+
+  return table.concat(result)
+end
+
+function msgpack.utf8Decode(message: string): string
+  local nBytes = floor(#message *  7 / 8)
+  local result = table.create(nBytes)
+
+  local bitPointer = 0
+  for i=1,nBytes do
+    local bitRemainder = bitPointer % 7
+    local byte = sbyte(message, 1 + floor(bitPointer / 7))
+    local nextByte = sbyte(message, 2 + floor(bitPointer / 7))
+
+    result[i] = char(bor(
+      lshift(extract(byte, 0, 7 - bitRemainder), bitRemainder + 1),
+      extract(nextByte, 6 - bitRemainder, 1 + bitRemainder)
+    ))
+
+    bitPointer += 8
+  end
+
+  return table.concat(result)
+end
+
 function msgpack.decode(message: string): any
   if message == "" then
     error("Could not decode - input string is too short")
