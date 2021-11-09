@@ -25,6 +25,16 @@ local message = msgpack.encode({"hello", "world", 123, key="value"})
 for i,v in pairs(msgpack.decode(message)) do
   print(i, v)
 end
+
+-- To store MessagePack message in DataStore, it first needs to be wrapped in UTF8 format
+-- This is not nescessary for HttpService or RemoteEvents!
+local dataStore = game:GetService("DataStoreService"):GetGlobalDataStore()
+dataStore:SetAsync("message", msgpack.utf8Encode(message))
+
+local retrieved = msgpack.utf8Decode(dataStore:GetAsync("message"))
+for i,v in pairs(msgpack.decode(retrieved)) do
+  print(i, v)
+end
 ```
 
 ## API
@@ -37,6 +47,15 @@ end
 * `msgpack.decode(message: string): any`
 
   Decodes MessagePack binary string as pure Luau value.
+
+* `msgpack.utf8Encode(message: string): string`
+
+  Wraps binary string in a UTF-8 compatible encoding.
+  Nescessary to save binary strings (like MessagePack serialized data) in DataStore.
+
+* `msgpack.utf8Decode(blob: string): string`
+
+  Unwraps binary string from UTF-8 compatible encoding.
 
 * `msgpack.ByteArray.new(blob: string): msgpack.ByteArray`
 
