@@ -520,10 +520,6 @@ return function()
       binary = string.char(0b11111111):rep(8)
       utf = string.char(0b01111111):rep(9) .. string.char(0b01000000)
       expect(hex(msgpack.utf8Encode(binary))).to.equal(hex(utf))
-
-      -- binary = "hello world"
-      -- utf = string.char(0b00110100, 0b00011001, 0b00101101, 0b01000110, 0b01100011, 0b00111100, 0b01000000, 0b01110111, 0b00110111, 0b01011100, 0b01001101, 0b01000110, 0b00100000)
-      -- expect(hex(msgpack.utf8Encode(binary))).to.equal(hex(utf))
     end)
   end)
 
@@ -542,10 +538,6 @@ return function()
       utf = string.char(0b01111111):rep(9) .. string.char(0b01000000)
       binary = string.char(0b11111111):rep(8)
       expect(hex(msgpack.utf8Decode(utf))).to.equal(hex(binary))
-
-      -- utf = string.char(0b00110100, 0b00011001, 0b00101101, 0b01000110, 0b01100011, 0b00111100, 0b01000000, 0b01110111, 0b00110111, 0b01011100, 0b01001101, 0b01000110, 0b00100000)
-      -- binary = "hello world"
-      -- expect(hex(msgpack.utf8Encode(utf))).to.equal(hex(binary))
     end)
   end)
 end
