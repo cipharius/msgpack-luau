@@ -7,8 +7,5 @@ authors = ["Valts Liepiņš <cipharius@pm.me>"]
 realm = "shared"
 registry = "https://github.com/UpliftGames/wally-index"
 
-[dependencies]
-TestEZ = "roblox/testez@0.4.1" # NOTE Dev dependency
-
 [dev-dependencies]
 TestEZ = "roblox/testez@0.4.1"
