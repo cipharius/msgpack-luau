@@ -4,8 +4,8 @@ registry = "test"
 
 [[package]]
 name = "cipharius/msgpack-luau"
-version = "0.2.0"
-dependencies = [["TestEZ", "roblox/testez@0.4.1"]]
+version = "0.2.1"
+dependencies = []
 
 [[package]]
 name = "roblox/testez"
