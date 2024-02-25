@@ -57,11 +57,7 @@ end
 
   Unwraps binary string from UTF-8 compatible encoding.
 
-* `msgpack.ByteArray.new(blob: string): msgpack.ByteArray`
-
-  Wraps a string value in order to represent MessagePack `bin` datatype.
-
-* `msgpack.Extension.new(extensionType: number, blob: string): msgpack.Extension`
+* `msgpack.Extension.new(extensionType: number, blob: buffer): msgpack.Extension`
 
   Create MessagePack extension type, which is used for custom datatype serialization purposes.
   First argument `extensionType` must be an integer.
@@ -92,7 +88,10 @@ To benchmark module's encoding performance same data is used as previously.
 It is first decoded as table structure then both `msgpack.encode` and `JSONEncode` encode it with the following results:
 ![Figure with JSONEncode and msgpack.encode benchmark results](./assets/encode-benchmark.png)
 
-MessagePack encoder is bit less consistent as `JSONEncode`, but on average `msgpack.encode` is as performant as `JSONEncode`.
+After transitioning to Luau buffer based encoding strategy, MessagePack encoder significantly exceeds the performance of the `JSONEncode` function.
+An interesting observation can be made on how consistent is it's execution time, even in comparision with the `msgpack.decode`.
+This is most likely is because `msgpack.encode` performs only a single dynamic allocation by computing the nescessary amount of bytes to encode the data and then allocates the result buffer in one go.
+
 Here is another benchmark which combines both decoding and encoding steps and as it can be seen, thanks to much greater `msgpack.decode` speed, both methods together perform better than built-in `JSONEncode` and `JSONDecode`:
 ![Figure with "JSONEncode & JSONDecode" and "msgpack.encode & msgpack.decode" benchmark results](./assets/decode-encode-benchmark.png)
 
