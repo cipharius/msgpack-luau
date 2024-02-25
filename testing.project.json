@@ -11,7 +11,7 @@
       },
 
       "Packages": {
-        "$path": "Packages"
+        "$path": "DevPackages"
       }
     },
 
