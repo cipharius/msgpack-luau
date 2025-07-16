@@ -134,7 +134,7 @@ local function parse(message: buffer, offset: number): (any, number)
              readu8(message, offset + 2),
              newBuf
            ),
-           offset + 2 + length
+           offset + 3 + length
 
   elseif byte == 0xC8 then -- ext 16
     local length = readu16(message, offset + 1)
@@ -144,7 +144,7 @@ local function parse(message: buffer, offset: number): (any, number)
              readu8(message, offset + 3),
              newBuf
            ),
-           offset + 3 + length
+           offset + 4 + length
 
   elseif byte == 0xC9 then -- ext 32
     local length = readu32(message, offset + 1)
@@ -154,7 +154,7 @@ local function parse(message: buffer, offset: number): (any, number)
              readu8(message, offset + 5),
              newBuf
            ),
-           offset + 5 + length
+           offset + 6 + length
 
   elseif byte == 0xCA then -- float 32
     return readf32(message, offset + 1),
